@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your GitHub Repositories</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script>
+        function searchRepos() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.repo-card');
+            cards.forEach(card => {
+                const title = card.querySelector('h2').innerText.toLowerCase();
+                if (title.includes(input)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Your GitHub Repositories</h1>
+        <input type="text" id="searchInput" onkeyup="searchRepos()" placeholder="Search for repositories..." class="search-bar">
+        <div class="gallery">
+            <% repos.forEach(repo => { %>
+                <div class="repo-card">
+                    <img src="<%= repo.owner.avatar_url %>" alt="Repo Owner Avatar">
+                    <h2><a href="<%= repo.html_url %>"><%= repo.name %></a></h2>
+                    <p><%= repo.description || "No description available" %></p>
+                </div>
+            <% }); %>
+        </div>
+        <a class="button" href="/">Log out</a>
+    </div>
+</body>
+</html>
