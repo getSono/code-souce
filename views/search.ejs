@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search GitHub Repositories</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search Repositories</a></li>
+                <li><a href="/repos">Your Repositories</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Search GitHub Repositories</h1>
+        <form action="/search" method="get">
+            <input type="text" name="query" placeholder="Search for repositories..." value="<%= query %>">
+            <button type="submit">Search</button>
+        </form>
+        <% if (repos.length > 0) { %>
+            <div class="repo-gallery">
+                <% repos.forEach(repo => { %>
+                    <div class="repo-card">
+                        <a href="/repos/<%= repo.owner.login %>/<%= repo.name %>">
+                            <img src="<%= repo.owner.avatar_url %>" alt="Owner Avatar" class="repo-avatar">
+                            <div class="repo-details">
+                                <h2><%= repo.name %></h2>
+                                <p><%= repo.description %></p>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </main>
+    <footer>
+        <p>&copy; 2024 GitHub Repo Viewer. All rights reserved.</p>
+    </footer>
+</body>
+</html>

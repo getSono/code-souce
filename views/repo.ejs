@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= repo.name %> - Repository Details</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search Repositories</a></li>
+                <li><a href="/repos">Your Repositories</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1><%= repo.name %></h1>
+        <p><%= repo.description %></p>
+        <div class="repo-contents">
+            <% contents.forEach(item => { %>
+                <div class="repo-item">
+                    <% if (item.type === 'file') { %>
+                        <a href="/repos/<%= owner %>/<%= repo.name %>/blob/<%= item.path %>"><%= item.name %></a>
+                    <% } else if (item.type === 'dir') { %>
+                        <a href="/repos/<%= owner %>/<%= repo.name %>/tree/<%= item.path %>"><%= item.name %></a>
+                    <% } %>
+                </div>
+            <% }); %>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 GitHub Repo Viewer. All rights reserved.</p>
+    </footer>
+</body>
+</html>

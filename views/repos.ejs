@@ -5,35 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your GitHub Repositories</title>
     <link rel="stylesheet" href="/styles.css">
-    <script>
-        function searchRepos() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.repo-card');
-            cards.forEach(card => {
-                const title = card.querySelector('h2').innerText.toLowerCase();
-                if (title.includes(input)) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        }
-    </script>
 </head>
 <body>
-    <div class="container">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search Repositories</a></li>
+                <li><a href="/repos">Your Repositories</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
         <h1>Your GitHub Repositories</h1>
-        <input type="text" id="searchInput" onkeyup="searchRepos()" placeholder="Search for repositories..." class="search-bar">
-        <div class="gallery">
-            <% repos.forEach(repo => { %>
-                <div class="repo-card">
-                    <img src="<%= repo.owner.avatar_url %>" alt="Repo Owner Avatar">
-                    <h2><a href="<%= repo.html_url %>"><%= repo.name %></a></h2>
-                    <p><%= repo.description || "No description available" %></p>
-                </div>
-            <% }); %>
-        </div>
-        <a class="button" href="/">Log out</a>
-    </div>
+        <% if (repos.length === 0) { %>
+            <p>No repositories found.</p>
+        <% } else { %>
+            <div class="repo-gallery">
+                <% repos.forEach(repo => { %>
+                    <div class="repo-card">
+                        <a href="/repos/<%= repo.owner.login %>/<%= repo.name %>">
+                            <img src="<%= repo.owner.avatar_url %>" alt="Owner Avatar" class="repo-avatar">
+                            <div class="repo-details">
+                                <h2><%= repo.name %></h2>
+                                <p><%= repo.description %></p>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </main>
+    <footer>
+        <p>&copy; 2024 GitHub Repo Viewer. All rights reserved.</p>
+    </footer>
 </body>
 </html>

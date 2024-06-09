@@ -1,20 +1,32 @@
 {
   "dependencies": {
     "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
+    "env": "^0.0.2",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "passport": "^0.7.0",
+    "passport-github": "^1.1.0",
     "passport-github2": "^0.1.12"
   },
   "name": "vokabeltrainer",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getSono/code-souce.git"
+  },
+  "bugs": {
+    "url": "https://github.com/getSono/code-souce/issues"
+  },
+  "homepage": "https://github.com/getSono/code-souce#readme"
 }

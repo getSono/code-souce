@@ -1,89 +1,100 @@
+
+require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
+const session = require('express-session');
 const passport = require('passport');
-const GitHubStrategy = require('passport-github2').Strategy;
-const path = require('path');
+const GitHubStrategy = require('passport-github').Strategy;
+const axios = require('axios');
 
 const app = express();
-const port = 3000;
+
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.use(new GitHubStrategy({
     clientID: 'Ov23lieCLPddkV8cxP0T',
-    clientSecret: 'b4ccc5e0775facd3807d0b5073d89df04712326a',
-    callbackURL: 'http://localhost:3000/auth/github/callback'
-},
-function(accessToken, refreshToken, profile, done) {
-    return done(null, { profile, accessToken });
+    clientSecret: '7b6d4359dfc687c406233a47e4ef7a2f5a0569d0',
+    callbackURL: 'https://crispy-capybara-jv649969gp4h5945-3000.app.github.dev/auth/github/callback'
+}, (accessToken, refreshToken, profile, cb) => {
+    return cb(null, { profile, accessToken });
 }));
 
 passport.serializeUser((user, done) => {
     done(null, user);
 });
 
-passport.deserializeUser((user, done) => {
-    done(null, user);
-});
-
-app.use(require('express-session')({ secret: 'your-secret-key', resave: true, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res) => {
-    res.render('index');
-});
-
-app.get('/search', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'search.html'));
+passport.deserializeUser((obj, done) => {
+    done(null, obj);
 });
 
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('index', { user: req.user });
 });
 
-app.get('/menu', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'menu.html'));
-});
+app.get('/auth/github', passport.authenticate('github'));
 
-
-app.get('/auth/github',
-    passport.authenticate('github', { scope: ['repo'] })
+app.get('/auth/github/callback', 
+    passport.authenticate('github', { failureRedirect: '/' }),
+    (req, res) => {
+        res.redirect('/');
+    }
 );
 
-app.get('/auth/github/callback',
-    passport.authenticate('github', { failureRedirect: '/' }),
-    function(req, res) {
-        res.redirect('/repos');
-    });
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
+});
 
 app.get('/repos', ensureAuthenticated, async (req, res) => {
-    try {
-        const response = await axios.get('https://api.github.com/user/repos', {
-            headers: { Authorization: `token ${req.user.accessToken}` }
-        });
-        res.render('repos', { repos: response.data });
-    } catch (error) {
-        res.status(500).send('Error fetching repositories');
+    const accessToken = req.user.accessToken;
+    const response = await axios.get('https://api.github.com/user/repos', {
+        headers: { Authorization: `token ${accessToken}` }
+    });
+    const repos = response.data;
+    res.render('repos', { repos });
+});
+
+app.get('/repos/:owner/:repo', ensureAuthenticated, async (req, res) => {
+    const { owner, repo } = req.params;
+    const accessToken = req.user.accessToken;
+    const repoResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, {
+        headers: { Authorization: `token ${accessToken}` }
+    });
+    const contentsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents`, {
+        headers: { Authorization: `token ${accessToken}` }
+    });
+    const repoData = repoResponse.data;
+    const contents = contentsResponse.data;
+    res.render('repo', { repo: repoData, contents, owner, repo });
+});
+
+app.get('/repos/:owner/:repo/blob/*', ensureAuthenticated, async (req, res) => {
+    const { owner, repo } = req.params;
+    const path = req.params[0];
+    const accessToken = req.user.accessToken;
+    const fileResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: { Authorization: `token ${accessToken}` },
+        params: { ref: 'main' }
+    });
+    const fileData = fileResponse.data;
+    if (fileData.encoding === 'base64') {
+        fileData.content = Buffer.from(fileData.content, 'base64').toString('utf8');
     }
+    res.render('file', { file: fileData, repo, owner });
 });
 
 app.get('/search', async (req, res) => {
-    const searchQuery = req.query.q;
-    try {
-        const response = await axios.get(`https://api.github.com/search/repositories?q=${searchQuery}`);
-        const repos = response.data.items;
-        res.render('search-results', { repos });
-    } catch (error) {
-        res.status(500).send('Error searching repositories');
+    const query = req.query.query;
+    let repos = [];
+    if (query) {
+        const response = await axios.get(`https://api.github.com/search/repositories?q=${query}`);
+        repos = response.data.items;
     }
+    res.render('search', { query, repos });
 });
-
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -92,6 +103,7 @@ function ensureAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

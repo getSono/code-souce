@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= file.name %> - File Details</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search Repositories</a></li>
+                <li><a href="/repos">Your Repositories</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1><%= file.name %></h1>
+        <pre><code><%= file.content %></code></pre>
+    </main>
+    <footer>
+        <p>&copy; 2024 GitHub Repo Viewer. All rights reserved.</p>
+    </footer>
+</body>
+</html>
